@@ -1,10 +1,16 @@
-from misc import TOKEN
 from telebot import TeleBot
 from classes.user import User
 from db.db import connect
 from business_handlers import *
+from dotenv import load_dotenv
+import os
+from json import dumps
 
 
+load_dotenv('.env')
+
+
+TOKEN = os.environ['TOKEN']
 bot = TeleBot(TOKEN)
 
 
