@@ -69,7 +69,8 @@ class User:
 
     @classmethod
     def create_default_user(cls, chat_id, conn, cursor):
-        cursor.execute(f'INSERT INTO {cls.table} (id, username) VALUES({chat_id}, "new_user")')
+        username = "'new_user'"
+        cursor.execute(f'INSERT INTO {cls.table} (id, username) VALUES({chat_id}, {username})')
         conn.commit()
 
     def save_next_message_handler(self, handler):
@@ -106,7 +107,7 @@ class User:
         conn, cursor = connect()
         cursor.execute(f"INSERT INTO Cart DEFAULT VALUES")
         conn.commit()
-        self.cur_cart_id = cursor.lastrowid
+        self.cur_cart_id = cursor.fetchone()[0]
         cursor.execute(f"UPDATE {self.table} SET cur_cart_id = {self.cur_cart_id} WHERE id = {self.id}")
         conn.commit()
         # TODO: удаление прошлой корзины
