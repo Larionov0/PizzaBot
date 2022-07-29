@@ -110,7 +110,7 @@ def choose_pizza_menu(user):
             f'FROM Pizza \n' \
             f'JOIN IngredientInPizza ON Pizza.id = IngredientInPizza.pizza_id \n' \
             f'JOIN Ingredient ON Ingredient.id = IngredientInPizza.ingredient_id \n' \
-            f'WHERE Pizza.is_proto = 1 \n' \
+            f'WHERE Pizza.is_proto = true \n' \
             f'ORDER BY Pizza.id'
     cursor.execute(query)
     table = cursor.fetchall()
@@ -146,7 +146,7 @@ def choose_pizza_menu_handler(user, data):
         return order_menu(user)
 
     conn, cursor = connect()
-    cursor.execute(f'UPDATE User_ SET cur_pizza_id=? WHERE id = {user.id}', (data,))
+    cursor.execute(f'UPDATE User_ SET cur_pizza_id=%s WHERE id = {user.id}', (data,))
     conn.commit()
     user.cur_pizza_id = data
     choose_pizza_size_menu(user, data)
@@ -177,7 +177,7 @@ def cart_menu_handler(user, data):
     if data == 'back':
         return choose_pizza_menu(user)
     conn, cursor = connect()
-    conn.execute(f'DELETE FROM PizzaCart WHERE pizza_id = {data}')
+    cursor.execute(f'DELETE FROM PizzaCart WHERE pizza_id = {data}')
     conn.commit()
     cart_menu(user)
 
@@ -188,7 +188,7 @@ def choose_pizza_size_menu(user, pizza_id):
             f'FROM Pizza \n' \
             f'JOIN IngredientInPizza ON Pizza.id = IngredientInPizza.pizza_id \n' \
             f'JOIN Ingredient ON Ingredient.id = IngredientInPizza.ingredient_id\n' \
-            f'WHERE Pizza.id = ?'
+            f'WHERE Pizza.id = %s'
     cursor.execute(query, (pizza_id,))
     table = cursor.fetchall()
 
@@ -212,11 +212,11 @@ def choose_pizza_size_menu(user, pizza_id):
 
 def add_pizza_to_cart(user):
     query = f"INSERT INTO Pizza (name, is_custom, is_proto, size) " \
-            f"SELECT name, is_custom, 0, {user.cur_chosen_size} FROM Pizza WHERE id={user.cur_pizza_id};"
+            f"SELECT name, is_custom, false, {user.cur_chosen_size} FROM Pizza WHERE id={user.cur_pizza_id} RETURNING id"
     conn, cursor = connect()
     cursor.execute(query)
     conn.commit()
-    pizza_copy_id = cursor.lastrowid
+    pizza_copy_id = cursor.fetchone()[0]
 
     query = f"INSERT INTO IngredientInPizza (ingredient_id, pizza_id, grams) " \
             f"SELECT ingredient_id, {pizza_copy_id}, grams FROM IngredientInPizza WHERE pizza_id={user.cur_pizza_id};"
@@ -237,7 +237,7 @@ def choose_pizza_size_menu_handler(user, data):
         return choose_pizza_menu(user)
     if data[0] == 's':
         new_size = data[1]
-        cursor.execute(f'UPDATE User_ SET cur_chosen_size = ? WHERE id = {user.id}',
+        cursor.execute(f'UPDATE User_ SET cur_chosen_size = %s WHERE id = {user.id}',
                        (new_size,))
         conn.commit()
         user.cur_chosen_size = new_size
