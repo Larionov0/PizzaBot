@@ -148,7 +148,6 @@ if __name__ == '__main__':
         cursor.execute(f"INSERT INTO Ingredient (name, price) VALUES (%s, %s)", list(ingr.values()))
         conn.commit()
 
-
     for pizza in pizzas:
         cursor.execute(f"INSERT INTO Pizza (name, is_custom, is_proto, size) VALUES (%s, %s, %s, %s)", (pizza['name'],
                                                                                                     False, True, 1))
