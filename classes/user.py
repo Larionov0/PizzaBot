@@ -2,6 +2,7 @@ from db.db import connect
 from business_handlers import HANDLERS
 from tools.pizza_sizes import pizza_sizes
 from datetime import datetime
+from classes.errors import *
 
 
 class User:
@@ -130,5 +131,3 @@ class User:
         query = f"UPDATE Orders SET status = {num} WHERE id = {self.cur_order_id}"
         cursor.execute(query)
         conn.commit()
-
-
